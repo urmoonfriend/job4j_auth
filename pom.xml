@@ -36,7 +36,7 @@
 				<liquibase.config>db/changelog/liquibase.properties</liquibase.config>
 			</properties>
 			<activation>
-				<activeByDefault>true</activeByDefault>
+				<activeByDefault>false</activeByDefault>
 			</activation>
 		</profile>
 	</profiles>
