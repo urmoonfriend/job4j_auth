@@ -1,10 +1,11 @@
 package kz.job4j.rest.service.impl;
 
-import kz.job4j.rest.model.Person;
+import kz.job4j.rest.model.entity.Person;
 import kz.job4j.rest.repository.PersonRepository;
 import kz.job4j.rest.service.PersonService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,6 +17,7 @@ import java.util.Optional;
 public class PersonServiceImpl implements PersonService {
 
     private final PersonRepository personRepository;
+    private final ModelMapper modelMapper;
 
     @Override
     public List<Person> findAll() {
@@ -23,13 +25,43 @@ public class PersonServiceImpl implements PersonService {
     }
 
     @Override
-    public Person save(Person person) {
-        return personRepository.save(person);
+    public Optional<Person> create(Person person) {
+        Optional<Person> result = Optional.empty();
+        try {
+            result = Optional.of(personRepository.save(person));
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+        return result;
     }
 
     @Override
-    public void delete(Person person) {
-        personRepository.deleteById(person.getId());
+    public Optional<Person> update(Person person) {
+        Optional<Person> result = Optional.empty();
+        try {
+            var personOpt = personRepository.findById(person.getId());
+            if (personOpt.isPresent()) {
+                Person personToUpdate = personOpt.get();
+                modelMapper.map(person, personToUpdate);
+                personRepository.deleteById(personToUpdate.getId());
+                result = Optional.of(personRepository.save(personToUpdate));
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+        return result;
+    }
+
+    @Override
+    public boolean deleteById(Integer id) {
+        boolean result = false;
+        try {
+            personRepository.deleteById(id);
+            result = true;
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+        return result;
     }
 
     @Override

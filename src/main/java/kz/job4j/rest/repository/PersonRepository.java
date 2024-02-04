@@ -1,7 +1,7 @@
 package kz.job4j.rest.repository;
 
 import org.springframework.data.repository.CrudRepository;
-import kz.job4j.rest.model.Person;
+import kz.job4j.rest.model.entity.Person;
 
 import java.util.List;
 
