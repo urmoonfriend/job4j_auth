@@ -30,7 +30,7 @@ public class PersonServiceImpl implements PersonService {
         try {
             result = Optional.of(personRepository.save(person));
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error(e.getMessage(), e);
         }
         return result;
     }
@@ -43,11 +43,10 @@ public class PersonServiceImpl implements PersonService {
             if (personOpt.isPresent()) {
                 Person personToUpdate = personOpt.get();
                 modelMapper.map(person, personToUpdate);
-                personRepository.deleteById(personToUpdate.getId());
                 result = Optional.of(personRepository.save(personToUpdate));
             }
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error(e.getMessage(), e);
         }
         return result;
     }
@@ -59,7 +58,7 @@ public class PersonServiceImpl implements PersonService {
             personRepository.deleteById(id);
             result = true;
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error(e.getMessage(), e);
         }
         return result;
     }
