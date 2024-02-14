@@ -1,30 +1,24 @@
 package kz.job4j.rest.service.impl;
 
-import kz.job4j.rest.filter.JWTAuthenticationFilter;
 import kz.job4j.rest.model.entity.Person;
 import kz.job4j.rest.repository.PersonRepository;
 import kz.job4j.rest.service.PersonService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
-import static java.util.Collections.emptyList;
-
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class PersonServiceImpl implements PersonService, UserDetailsService {
+public class PersonServiceImpl implements PersonService {
 
     private final PersonRepository personRepository;
     private final ModelMapper modelMapper;
+
     @Override
     public List<Person> findAll() {
         return personRepository.findAll();
@@ -79,12 +73,4 @@ public class PersonServiceImpl implements PersonService, UserDetailsService {
         return personRepository.findByLogin(login);
     }
 
-    @Override
-    public UserDetails loadUserByUsername(String login) throws UsernameNotFoundException {
-        var person = personRepository.findByLogin(login);
-        if (person.isEmpty()) {
-            throw new UsernameNotFoundException(login);
-        }
-        return new User(person.get().getLogin(), person.get().getPassword(), emptyList());
-    }
 }

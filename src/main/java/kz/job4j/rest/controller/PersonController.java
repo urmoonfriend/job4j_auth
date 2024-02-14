@@ -1,6 +1,5 @@
 package kz.job4j.rest.controller;
 
-import kz.job4j.rest.config.PasswordEncoderConfig;
 import kz.job4j.rest.exception.PersonExistsException;
 import kz.job4j.rest.exception.PersonNotFoundException;
 import kz.job4j.rest.model.entity.Person;
@@ -9,6 +8,7 @@ import kz.job4j.rest.service.PersonService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,6 +20,7 @@ import java.util.List;
 public class PersonController {
     private final PersonService personService;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final AuthenticationManager authenticationManager;
 
     @GetMapping("/")
     public ResponseEntity<ResultMessage<List<Person>>> findAll() {
@@ -33,6 +34,31 @@ public class PersonController {
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.CONFLICT)
                         .body(ResultMessage.error(new PersonExistsException(personRequest.getLogin()).getMessage())));
     }
+
+    /*
+    @PostMapping("/login")
+    public ResponseEntity<ResultMessage<String>> authenticateUser(@RequestBody Person loginRequest) {
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            loginRequest.getLogin(),
+                            loginRequest.getPassword()
+                    )
+            );
+            Person user = (Person) authentication.getPrincipal();
+            String token = JWT.create()
+                    .withSubject(user.getLogin())
+                    .withExpiresAt(new Date(System.currentTimeMillis() + JWTAuthenticationFilter.EXPIRATION_TIME))
+                    .sign(Algorithm.HMAC512(JWTAuthenticationFilter.SECRET.getBytes()));
+
+            return ResponseEntity.ok().header(JWTAuthenticationFilter.HEADER_STRING,
+                    JWTAuthenticationFilter.TOKEN_PREFIX + token).body(
+                            ResultMessage.success("Token generated successfully"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(
+                    ResultMessage.error("Authentication failed: " + e.getMessage()));
+        }
+    }*/
 
     @GetMapping("/{id}")
     public ResponseEntity<ResultMessage<Person>> findById(@PathVariable int id) {
