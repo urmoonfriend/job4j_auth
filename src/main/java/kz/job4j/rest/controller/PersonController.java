@@ -1,5 +1,6 @@
 package kz.job4j.rest.controller;
 
+import kz.job4j.rest.config.PasswordEncoderConfig;
 import kz.job4j.rest.exception.PersonExistsException;
 import kz.job4j.rest.exception.PersonNotFoundException;
 import kz.job4j.rest.model.entity.Person;
@@ -8,6 +9,7 @@ import kz.job4j.rest.service.PersonService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,10 +19,19 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PersonController {
     private final PersonService personService;
+    private final BCryptPasswordEncoder passwordEncoder;
 
     @GetMapping("/")
     public ResponseEntity<ResultMessage<List<Person>>> findAll() {
         return ResponseEntity.ok(ResultMessage.success(personService.findAll()));
+    }
+
+    @PostMapping("/sign-up")
+    public ResponseEntity<ResultMessage<Person>> signUp(@RequestBody Person personRequest) {
+        personRequest.setPassword(passwordEncoder.encode(personRequest.getPassword()));
+        return personService.update(personRequest).map(person -> ResponseEntity.ok(ResultMessage.success(person)))
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.CONFLICT)
+                        .body(ResultMessage.error(new PersonExistsException(personRequest.getLogin()).getMessage())));
     }
 
     @GetMapping("/{id}")
