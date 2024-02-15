@@ -8,10 +8,11 @@ import kz.job4j.rest.service.PersonService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -20,7 +21,6 @@ import java.util.List;
 public class PersonController {
     private final PersonService personService;
     private final BCryptPasswordEncoder passwordEncoder;
-    private final AuthenticationManager authenticationManager;
 
     @GetMapping("/")
     public ResponseEntity<ResultMessage<List<Person>>> findAll() {
@@ -28,7 +28,7 @@ public class PersonController {
     }
 
     @PostMapping("/sign-up")
-    public ResponseEntity<ResultMessage<Person>> signUp(@RequestBody Person personRequest) {
+    public ResponseEntity<ResultMessage<Person>> signUp(@Valid @RequestBody Person personRequest) {
         personRequest.setPassword(passwordEncoder.encode(personRequest.getPassword()));
         return personService.update(personRequest).map(person -> ResponseEntity.ok(ResultMessage.success(person)))
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.CONFLICT)
@@ -38,13 +38,13 @@ public class PersonController {
     @GetMapping("/{id}")
     public ResponseEntity<ResultMessage<Person>> findById(@PathVariable int id) {
         var personOpt = personService.findById(id);
-        return personOpt.map(person -> ResponseEntity.ok(ResultMessage.success(person)))
-                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(ResultMessage.error(new PersonNotFoundException(id).getMessage())));
+        return personOpt.map(person -> ResponseEntity.ok(ResultMessage.success(personOpt.get())))
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, new PersonNotFoundException(id).getMessage()));
     }
 
     @PutMapping("/")
-    public ResponseEntity<ResultMessage<Person>> update(@RequestBody Person personRequest) {
+    public ResponseEntity<ResultMessage<Person>> update(@Valid @RequestBody Person personRequest) {
         return personService.update(personRequest).map(person -> ResponseEntity.ok(ResultMessage.success(person)))
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.CONFLICT)
                         .body(ResultMessage.error(new PersonExistsException(personRequest.getLogin()).getMessage())));

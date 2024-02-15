@@ -7,6 +7,7 @@ import lombok.NonNull;
 import lombok.experimental.Accessors;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
 import java.util.Objects;
 
 @Entity
@@ -20,8 +21,10 @@ public class Person {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     @NonNull
+    @NotBlank
     private String login;
     @NonNull
+    @NotBlank
     private String password;
 
     @Override
