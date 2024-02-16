@@ -1,5 +1,6 @@
 package kz.job4j.rest.service;
 
+import kz.job4j.rest.model.dto.ChangePasswordDto;
 import kz.job4j.rest.model.entity.Person;
 
 import java.util.List;
@@ -18,4 +19,5 @@ public interface PersonService {
 
     Optional<Person> findByLogin(String login);
 
+    Optional<Person> changePassword(ChangePasswordDto dto);
 }

@@ -1,7 +1,9 @@
 package kz.job4j.rest.controller;
 
+import kz.job4j.rest.exception.CredentialsIncorrectException;
 import kz.job4j.rest.exception.PersonExistsException;
 import kz.job4j.rest.exception.PersonNotFoundException;
+import kz.job4j.rest.model.dto.ChangePasswordDto;
 import kz.job4j.rest.model.entity.Person;
 import kz.job4j.rest.model.response.ResultMessage;
 import kz.job4j.rest.service.PersonService;
@@ -37,8 +39,8 @@ public class PersonController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ResultMessage<Person>> findById(@PathVariable int id) {
-        var personOpt = personService.findById(id);
-        return personOpt.map(person -> ResponseEntity.ok(ResultMessage.success(personOpt.get())))
+        return personService.findById(id)
+                .map(person -> ResponseEntity.ok(ResultMessage.success(person)))
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, new PersonNotFoundException(id).getMessage()));
     }
@@ -59,5 +61,13 @@ public class PersonController {
             response = ResponseEntity.ok(ResultMessage.success());
         }
         return response;
+    }
+
+    @PatchMapping("/")
+    public ResponseEntity<ResultMessage<Person>> patch(@Valid @RequestBody ChangePasswordDto request) {
+        return personService.changePassword(request)
+                .map(person -> ResponseEntity.ok(ResultMessage.success(person)))
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, new CredentialsIncorrectException().getMessage()));
     }
 }

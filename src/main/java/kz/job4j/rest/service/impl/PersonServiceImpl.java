@@ -1,5 +1,6 @@
 package kz.job4j.rest.service.impl;
 
+import kz.job4j.rest.model.dto.ChangePasswordDto;
 import kz.job4j.rest.model.entity.Person;
 import kz.job4j.rest.repository.PersonRepository;
 import kz.job4j.rest.service.PersonService;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Service
 @RequiredArgsConstructor
@@ -73,4 +75,18 @@ public class PersonServiceImpl implements PersonService {
         return personRepository.findByLogin(login);
     }
 
+    @Override
+    public Optional<Person> changePassword(ChangePasswordDto dto) {
+        AtomicReference<Optional<Person>> personOpt = new AtomicReference<>(Optional.empty());
+        findByLogin(dto.getLogin()).ifPresent(
+                person -> {
+                    if (person.getPassword().equals(dto.getCurrentPassword())) {
+                        person.setPassword(dto.getNewPassword());
+                        personRepository.save(person);
+                        personOpt.set(Optional.of(person));
+                    }
+                }
+        );
+        return personOpt.get();
+    }
 }
